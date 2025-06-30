@@ -20,7 +20,3 @@
 ## Files
 - `wordle_game.py` — Main game script
 - `wordbank.txt` — Word list
-
-## License
-
-MIT
