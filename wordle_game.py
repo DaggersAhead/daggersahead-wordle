@@ -1,8 +1,9 @@
 import random, os
 os.system('')
 
-BLANK_ROW = "\033[107;30;1m ? \033[0m" * 5
+BLANK_ROW = "\033[107;30;1;4m ? \033[0m " * 5
 ALPHABET = "A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z"
+WORDBANK = ['fever', 'horse', 'rabid', 'shore', 'brain', 'craze', 'antsy', 'sonic', 'marsh']
 
 
 def play_or_not(p_input):#decide whether to quit or start a game
@@ -12,7 +13,7 @@ def play_or_not(p_input):#decide whether to quit or start a game
         quit()
     return True
 
-def play_again(p_input):
+def play_again(p_input): #decide whether to quit or play again
     while p_input.lower() != "y" and p_input.lower() != "n":
         p_input = input("Wrong input! Try again: Y/N\n")
     if p_input.lower() == "n":
@@ -20,13 +21,23 @@ def play_again(p_input):
     return True
 
 def word_pick(): #picks a word out of a text file
-    words_file_path = input("Enter path of file containing words: ")
-    with open(words_file_path, 'r', encoding='utf-8') as file:
-        file_content = file.read()
-        words = file_content.split(", ")
-        return random.choice(words).lower()
-    ###testword = "tests"
-    ###return testword.lower()
+    decision = ''
+    decision = input("""Enter '1' to use the existing wordbank.
+Enter '2' to use a custom wordbank.
+Enter '3' to use debug word (TESTS).
+Input: """)
+    while decision != '1' or decision != '2' or decision != '3':
+        if decision == '1':
+         return random.choice(WORDBANK).lower()
+        elif decision == '2':
+            words_file_path = input("Enter path of wordbank file: ")
+            with open(words_file_path, 'r', encoding='utf-8') as file:
+                file_content = file.read()
+            words = file_content.split(", ")
+            return random.choice(words).lower()
+        elif decision == '3':
+            return 'tests'
+        decision = input("Invalid input! Enter '1', '2' or '3'.\nInput: ")
 
 
 def starting_board_view(): #displays an empty 5x6 board
@@ -80,16 +91,16 @@ def check_guess(guess: str, secret: tuple, attempts: int, correct_list, wrong_li
     return correct_list, wrong_list, nonexistent_list, attempts, exacts, guess_result
 
 
-def block_replace(guess_result: list):
+def block_replace(guess_result: list, guess: str):
     index = 0
     modified_results = []
     for index, letter in enumerate(guess_result):
         if letter.isupper():
-            modified_results.append(f"\033[42;1m {letter} \033[0m") #green block
+            modified_results.append(f"\033[42;1;4m {letter} \033[0m ") #green block
         elif letter == '?':
-            modified_results.append(f"\033[41;1m ? \033[0m") #red block
+            modified_results.append(f"\033[41;1;4m {guess[index].upper()} \033[0m ") #red block
         else:
-            modified_results.append(f"\033[43;1m {letter.upper()} \033[0m") #yellow block
+            modified_results.append(f"\033[43;1;4m {letter.upper()} \033[0m ") #yellow block
     return modified_results
 
 
@@ -117,7 +128,7 @@ def main():
         total_results = []  # list of strings that contain results so far
         guessed_word = ""
         secret_tup = tuple(word_pick())
-        ###print(''.join(secret_tup)) #REMOVE IN FINAL
+        ###print(''.join(secret_tup)) #Reveals word
         starting_board_view() #Shows blank board
         guessed_word = input("\nEnter your guess: ").lower()
         while check_validity(guessed_word) is False:
@@ -126,7 +137,7 @@ def main():
             check_guess(guessed_word, secret_tup, attempts_left,
                         correct_spots_list, wrong_spots_list, nonexistent_letters_list))
         # at this point: attempts_left = 5
-        guessed_result = block_replace(guessed_result)
+        guessed_result = block_replace(guessed_result, guessed_word)
         total_results = print_results(correct_spots_list, wrong_spots_list, nonexistent_letters_list,
                                       guessed_result, total_results, attempts_left)
 
@@ -137,7 +148,7 @@ def main():
             correct_spots_list, wrong_spots_list, nonexistent_letters_list, attempts_left, exact_matches, guessed_result = (
                 check_guess(guessed_word, secret_tup, attempts_left,
                             correct_spots_list, wrong_spots_list, nonexistent_letters_list))
-            guessed_result = block_replace(guessed_result)
+            guessed_result = block_replace(guessed_result, guessed_word)
             total_results = print_results(correct_spots_list, wrong_spots_list, nonexistent_letters_list,
                                           guessed_result, total_results, attempts_left)
 
